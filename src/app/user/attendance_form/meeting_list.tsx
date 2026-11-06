@@ -30,7 +30,7 @@ function AuthCodeForm({ tile }: { tile: Tile }) {
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // TODO: send { meetingId: tile.id, code } to the backend when the API is available
+    // TODO: send { meetingId: tile.id, code} to the backend when the API is available
     console.log("submit attendance", { meetingId: tile.id, code });
   }
 
