@@ -13,8 +13,9 @@ const TempTiles: Tile[] = [
 export default function Attendance_Form() {
   return (
     <main className="flex flex-1 items-center justify-center px-4 py-4 font-mono">
-      <div className="flex flex-col items-center px-6 py-4" style={{ width: '1200px', height: '800px', backgroundColor: '#CCCCCC', borderWidth: '10px', borderColor: '#000000', borderRadius: '20px'}}>
-        <h1 className="mb-4 text-4xl font-bold text-black">Select a Meeting</h1>
+      {/* grows with the list up to the max height, then the list scrolls */}
+      <div className="flex max-h-[min(800px,85vh)] w-full max-w-[1200px] flex-col items-center px-3 py-4 sm:px-6" style={{ backgroundColor: '#CCCCCC', borderWidth: '10px', borderColor: '#000000', borderRadius: '20px'}}>
+        <h1 className="mb-4 text-center text-3xl font-bold sm:text-4xl text-black">Select a Meeting</h1>
         <MeetingList tiles={TempTiles} />
       </div>
     </main>
