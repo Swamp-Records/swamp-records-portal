@@ -90,7 +90,7 @@ export default function MeetingList({ tiles }: { tiles: Tile[] }) {
       </div>
 
       {/* scrollable panel holding the meeting tiles */}
-      <div className="min-h-0 w-full flex-1 overflow-y-auto rounded-[20px] border-[5px] border-black bg-[#dddddd] p-3">
+      <div className="min-h-0 w-full flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-[20px] border-[5px] border-black bg-[#dddddd] p-3">
         {tiles.map((tile) => (
           <DisplayTile
             key={tile.id}
