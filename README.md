@@ -37,6 +37,13 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## Frontend
 
+The frontend is split into 3 different sections: user, admin, and login. 
+* If not logged in, any access will be redirected to login
+* If logged in and admin_status == false, will only be able to access the user menus, any unautharized access will be redirected to user home
+* If logged in and admin_status == true, will originally be directed to admin home but can (via side menu) access the user home and user pages
+    * admin side menu will always be different (extra options) than user side menu
+
+
 ### Layout
 
 redirect
