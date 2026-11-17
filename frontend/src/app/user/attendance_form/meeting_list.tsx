@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import StatusBanner, { type BannerState } from "@/components/status_banner";
 
 export type Tile = {
   name: string;
@@ -30,13 +31,40 @@ function DisplayTileContent({ tile }: { tile: Tile }) {
   );
 }
 
-function AuthCodeForm({ tile }: { tile: Tile }) {
-  const [code, setCode] = useState("");
+// placeholder until the backend can verify codes
+const TEMP_VALID_CODE = "1234";
 
-  function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
+// resolves true if the code was accepted, false if it was rejected, throws if the request itself failed
+async function submitAttendance(meetingId: string, code: string): Promise<boolean> {
+  // TODO: send to the backend when the API is available, e.g.
+  // const res = await fetch("/api/attendance", { method: "POST", body: JSON.stringify({ meetingId, code }) });
+  // if (res.status === 400 || res.status === 403) return false;
+  // if (!res.ok) throw new Error(`Submission failed: ${res.status}`);
+  // return true;
+  console.log("submit attendance", { meetingId, code });
+  return code === TEMP_VALID_CODE;
+}
+
+function AuthCodeForm({ tile, onResult }: { tile: Tile; onResult: (banner: Omit<BannerState, "id">, accepted: boolean) => void }) {
+  const [code, setCode] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-    // TODO: send { meetingId: tile.id, code} to the backend when the API is available
-    console.log("submit attendance", { meetingId: tile.id, code });
+    setSubmitting(true);
+    try {
+      const accepted = await submitAttendance(tile.id, code);
+      if (accepted) {
+        onResult({ type: "success", message: "Attendance recorded" }, true);
+      } else {
+        setCode("");
+        onResult({ type: "error", message: "Invalid code, please try again" }, false);
+      }
+    } catch {
+      onResult({ type: "error", message: "Submission failed, please try again" }, false);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -52,22 +80,22 @@ function AuthCodeForm({ tile }: { tile: Tile }) {
       />
       <button
         type="submit"
-        disabled={!code}
+        disabled={!code || submitting}
         className="cursor-pointer rounded-xl border-2 border-black bg-[#2f6db5] px-4 py-2 text-sm text-white sm:px-6 sm:text-base disabled:cursor-not-allowed disabled:opacity-50"
       >
-        Submit
+        {submitting ? "Submitting..." : "Submit"}
       </button>
     </form>
   );
 }
 
-function DisplayTile({ tile, expanded, onToggle }: { tile: Tile; expanded: boolean; onToggle: () => void }) {
+function DisplayTile({ tile, expanded, onToggle, onResult }: { tile: Tile; expanded: boolean; onToggle: () => void; onResult: (banner: Omit<BannerState, "id">, accepted: boolean) => void }) {
   return (
     <div className="shrink-0 overflow-hidden" style={{ width: '100%', backgroundColor: '#EDEDED', borderWidth: '5px', borderColor: '#000000', borderRadius: '20px', marginBottom: '10px'}}>
       <button type="button" onClick={onToggle} aria-expanded={expanded} className="block w-full cursor-pointer py-4 hover:bg-[#e0e0e0] sm:py-6">
         <DisplayTileContent tile={tile} />
       </button>
-      {expanded && <AuthCodeForm tile={tile} />}
+      {expanded && <AuthCodeForm tile={tile} onResult={onResult} />}
     </div>
   );
 }
@@ -75,31 +103,47 @@ function DisplayTile({ tile, expanded, onToggle }: { tile: Tile; expanded: boole
 export default function MeetingList({ tiles }: { tiles: Tile[] }) {
   // only one tile can be open at a time
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [banner, setBanner] = useState<BannerState | null>(null);
+  const hideBanner = useCallback(() => setBanner(null), []);
+
+  function handleResult(result: Omit<BannerState, "id">, accepted: boolean) {
+    setBanner({ ...result, id: Date.now() });
+    if (accepted) setExpandedId(null); // close the tile once attendance is recorded
+  }
 
   return (
     <>
-      {/* header row, stays in place while the tiles scroll */}
-      <div className="shrink-0 py-2" style={{ width: '100%', backgroundColor: '#EDEDED', borderWidth: '5px', borderColor: '#000000', borderRadius: '20px', marginBottom: '10px'}}>
-        <div className={headerColumnsClassName}>
-          <div>Name:</div>
-          <div>Location:</div>
-          <div>Date:</div>
-          <div>Time:</div>
-          <div>ID:</div>
-        </div>
-      </div>
+      <StatusBanner banner={banner} onDone={hideBanner} />
 
-      {/* scrollable panel holding the meeting tiles */}
-      <div className="min-h-0 w-full flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-[20px] border-[5px] border-black bg-[#dddddd] p-3">
-        {tiles.map((tile) => (
-          <DisplayTile
-            key={tile.id}
-            tile={tile}
-            expanded={expandedId === tile.id}
-            onToggle={() => setExpandedId(expandedId === tile.id ? null : tile.id)}
-          />
-        ))}
-      </div>
+      <main className="flex flex-1 items-center justify-center px-4 py-4 font-mono">
+        {/* grows with the list up to the max height, then the list scrolls */}
+        <div className="flex max-h-[min(800px,85vh)] w-full max-w-[1200px] flex-col items-center px-3 py-4 sm:px-6" style={{ backgroundColor: '#CCCCCC', borderWidth: '10px', borderColor: '#000000', borderRadius: '20px'}}>
+          <h1 className="mb-4 text-center text-3xl font-bold sm:text-4xl text-black">Select a Meeting</h1>
+          {/* header row, stays in place while the tiles scroll */}
+          <div className="shrink-0 py-2" style={{ width: '100%', backgroundColor: '#EDEDED', borderWidth: '5px', borderColor: '#000000', borderRadius: '20px', marginBottom: '10px'}}>
+            <div className={headerColumnsClassName}>
+              <div>Name:</div>
+              <div>Location:</div>
+              <div>Date:</div>
+              <div>Time:</div>
+              <div>ID:</div>
+            </div>
+          </div>
+
+          {/* scrollable panel holding the meeting tiles */}
+          <div className="min-h-0 w-full flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-[20px] border-[5px] border-black bg-[#dddddd] p-3">
+            {tiles.map((tile) => (
+              <DisplayTile
+                key={tile.id}
+                tile={tile}
+                expanded={expandedId === tile.id}
+                onToggle={() => setExpandedId(expandedId === tile.id ? null : tile.id)}
+                onResult={handleResult}
+              />
+            ))}
+          </div>
+        </div>
+      </main>
     </>
   );
 }
