@@ -31,8 +31,8 @@ function DisplayTileContent({ tile }: { tile: Tile }) {
   );
 }
 
-// placeholder until the backend can verify codes
-const TEMP_VALID_CODE = "1234";
+// placeholder until the backend can verify codes: any all-digit code is accepted
+const TEMP_VALID_CODE = /^\d+$/;
 
 // resolves true if the code was accepted, false if it was rejected, throws if the request itself failed
 async function submitAttendance(meetingId: string, code: string): Promise<boolean> {
@@ -42,7 +42,7 @@ async function submitAttendance(meetingId: string, code: string): Promise<boolea
   // if (!res.ok) throw new Error(`Submission failed: ${res.status}`);
   // return true;
   console.log("submit attendance", { meetingId, code });
-  return code === TEMP_VALID_CODE;
+  return TEMP_VALID_CODE.test(code);
 }
 
 function AuthCodeForm({ tile, onResult }: { tile: Tile; onResult: (banner: Omit<BannerState, "id">, accepted: boolean) => void }) {
