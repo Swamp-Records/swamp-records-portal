@@ -11,7 +11,7 @@ type Tile = {
 };
 
 const tiles: Tile[] = [
-  { title: "Create A Meeting", href: "/admin/meeting_creation", img: calendarIcon },
+  { title: "Meeting Manager", href: "/admin/meeting_manager", img: calendarIcon },
   { title: "Attendance Statistics", href: "/admin/statistics", img: chartIcon },
   { title: "User Lookup", href: "/admin/user_lookup", img: searchIcon },
   { title: "Excuse Approval", href: "/admin/excuse_approval", img: approveIcon },
