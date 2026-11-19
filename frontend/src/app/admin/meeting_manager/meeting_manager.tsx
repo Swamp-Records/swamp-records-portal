@@ -3,12 +3,13 @@
 import { useCallback, useState } from "react";
 import Image, { type StaticImageData } from "next/image";
 import StatusBanner, { type BannerState } from "@/components/status_banner";
+import { renderMeetingCard } from "./meeting_card";
 import copyIcon from "../../../../images/copy-link-icon.png";
 import closeIcon from "../../../../images/close-line-icon.png";
 import trashIcon from "../../../../images/recycle-bin-line-icon.png";
 
 export type Meeting = {
-  id: string;
+  id: string; // 9 digit meeting id
   name: string;
   location: string;
   pin: string;
@@ -18,14 +19,15 @@ type NewMeeting = Pick<Meeting, "name" | "location">;
 
 const emptyMeeting: NewMeeting = { name: "", location: "" };
 
-// placeholder until the backend creates meetings: makes a random 4 digit pin locally
+// placeholder until the backend creates meetings: makes a random 9 digit id and 4 digit pin locally
 async function createMeeting(meeting: NewMeeting): Promise<Meeting> {
   // TODO: send to the backend when the API is available, e.g.
   // const res = await fetch("/api/meetings", { method: "POST", body: JSON.stringify(meeting) });
   // if (!res.ok) throw new Error(`Create failed: ${res.status}`);
   // return res.json();
   const pin = String(Math.floor(1000 + Math.random() * 9000));
-  return { ...meeting, id: crypto.randomUUID(), pin };
+  const id = String(Math.floor(100_000_000 + Math.random() * 900_000_000));
+  return { ...meeting, id, pin };
 }
 
 // stops the meeting from accepting attendance codes
@@ -42,7 +44,7 @@ async function deleteMeeting(id: string) {
 
 const panelStyle = { backgroundColor: '#CCCCCC', borderWidth: '10px', borderColor: '#000000', borderRadius: '20px' };
 // shared by the header row and each meeting so the columns line up
-const columnsClassName = "grid grid-cols-[1fr_1fr_0.6fr_auto] items-center gap-2 px-3 text-left text-black sm:gap-4 sm:px-5 [&>*]:min-w-0 [&>*]:break-words";
+const columnsClassName = "grid grid-cols-[1fr_1fr_1fr_0.6fr_auto] items-center gap-2 px-3 text-left text-black sm:gap-4 sm:px-5 [&>*]:min-w-0 [&>*]:break-words";
 const blueButtonClassName = "cursor-pointer rounded-xl border-2 border-black bg-[#2f6db5] px-6 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50";
 const rowClassName = "flex items-center justify-between gap-4 rounded-xl border-2 border-black bg-[#ededed] px-5 py-3";
 const inputClassName = "w-1/2 min-w-0 rounded-xl border-2 border-black bg-white px-3 py-2 text-center text-black placeholder:text-gray-400";
@@ -60,9 +62,10 @@ function MeetingRow({ meeting, onCopy, onEnd, onDelete }: { meeting: Meeting; on
     <div className={`${columnsClassName} rounded-xl border-2 border-black bg-[#ededed] py-3 text-xs sm:text-base`}>
       <div>{meeting.name}</div>
       <div>{meeting.location}</div>
+      <div>{meeting.id}</div>
       <div>{meeting.pin}</div>
       <div className="flex gap-1 sm:gap-2">
-        <IconButton icon={copyIcon} label={`Copy pin for ${meeting.name}`} onClick={onCopy} />
+        <IconButton icon={copyIcon} label={`Copy attendance card for ${meeting.name}`} onClick={onCopy} />
         <IconButton icon={closeIcon} label={`End ${meeting.name}`} onClick={onEnd} />
         <IconButton icon={trashIcon} label={`Delete ${meeting.name}`} onClick={onDelete} />
       </div>
@@ -141,12 +144,24 @@ export default function MeetingManager({ initialMeetings }: { initialMeetings: M
     setBanner((current) => ({ type, message, id: (current?.id ?? 0) + 1 }));
   }
 
+  // copies the meeting's card image; if the browser won't put images on the clipboard, downloads it instead
   async function handleCopy(meeting: Meeting) {
+    // the promise goes straight into ClipboardItem so Safari still counts it as part of the click
+    const image = renderMeetingCard(meeting);
     try {
-      await navigator.clipboard.writeText(meeting.pin);
-      showBanner("success", `Copied pin ${meeting.pin}`);
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": image })]);
+      showBanner("success", `Copied card for ${meeting.name}`);
     } catch {
-      showBanner("error", "Couldn't copy the pin");
+      try {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(await image);
+        link.download = `${meeting.name.replace(/[^\w-]+/g, "_")}_attendance.png`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        showBanner("success", "Couldn't copy, downloaded the card instead");
+      } catch {
+        showBanner("error", "Couldn't create the card");
+      }
     }
   }
 
@@ -185,6 +200,7 @@ export default function MeetingManager({ initialMeetings }: { initialMeetings: M
                 <div className={`${columnsClassName} shrink-0 rounded-xl border-2 border-black bg-[#ededed] py-1 text-xs sm:text-sm`}>
                   <div>Name:</div>
                   <div>Location:</div>
+                  <div>ID:</div>
                   <div>Pin:</div>
                   {/* keeps the header columns lined up with the icon buttons below */}
                   <div className="invisible flex gap-1 sm:gap-2" aria-hidden>
