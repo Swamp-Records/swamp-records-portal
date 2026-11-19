@@ -1,9 +1,9 @@
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
-import checklistIcon from "../../../../images/checklist-icon-white.png";
 import calendarIcon from "../../../../images/calendar-icon-white.png";
-import historyIcon from "../../../../images/history-icon-white.png";
-
+import chartIcon from "../../../../images/column-chart-icon.png";
+import searchIcon from "../../../../images/search-icon.png";
+import approveIcon from "../../../../images/application-approved-icon.png";
 type Tile = {
   title: string;
   href?: string;
@@ -11,10 +11,10 @@ type Tile = {
 };
 
 const tiles: Tile[] = [
-  { title: "Create A Meeting", href: "/admin/meeting_creation", img: checklistIcon },
-  { title: "Attendance Statistics", href: "/admin/statistics", img: calendarIcon },
-  { title: "User Lookup", href: "/admin/user_lookup", img: historyIcon },
-  { title: "Excuse Approval", href: "/admin/excuse_approval", img: historyIcon },
+  { title: "Create A Meeting", href: "/admin/meeting_creation", img: calendarIcon },
+  { title: "Attendance Statistics", href: "/admin/statistics", img: chartIcon },
+  { title: "User Lookup", href: "/admin/user_lookup", img: searchIcon },
+  { title: "Excuse Approval", href: "/admin/excuse_approval", img: approveIcon },
 ];
 
 function TileContent({ title, img }: { title: string; img: StaticImageData }) {
