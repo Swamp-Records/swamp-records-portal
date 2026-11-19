@@ -59,6 +59,24 @@ const series = [
     { key: "unexcused", name: "Unexcused absences", dash: "2 4", width: 1.5, Dot: DiamondDot },
 ] as const;
 
+// Recharts' default legend draws the same solid line + circle for every series,
+// so this draws each one's own dash pattern and marker shape instead
+function ChartLegend() {
+    return (
+        <ul className="flex flex-wrap justify-center gap-x-5 gap-y-1 pt-2 text-xs text-black">
+            {series.map(({ key, name, dash, width, Dot }) => (
+                <li key={key} className="flex items-center gap-1.5">
+                    <svg width={36} height={12} aria-hidden>
+                        <line x1={0} y1={6} x2={36} y2={6} stroke={INK} strokeWidth={width} strokeDasharray={dash} />
+                        <Dot cx={18} cy={6} />
+                    </svg>
+                    {name}
+                </li>
+            ))}
+        </ul>
+    );
+}
+
 export default function AttendanceChart({ data }: { data: MeetingStats[] }) {
     return (
         <ResponsiveContainer width="100%" height="100%">
@@ -91,7 +109,7 @@ export default function AttendanceChart({ data }: { data: MeetingStats[] }) {
                     labelStyle={{ color: INK, fontWeight: "bold" }}
                     cursor={{ stroke: INK, strokeDasharray: "3 3" }}
                 />
-                <Legend wrapperStyle={{ fontSize: 12, color: INK, paddingTop: 8 }} />
+                <Legend content={() => <ChartLegend />} />
                 {series.map(({ key, name, dash, width, Dot }) => (
                     <Line
                         key={key}
