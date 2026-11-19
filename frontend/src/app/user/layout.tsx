@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import logo from "../../../images/black_swamp_records_logo.png";
-import UserMenu from "./user_menu";
+import UserMenu from "../user_menu";
 
 export default function UserLayout({ children }: LayoutProps<"/user">) {
   return (
