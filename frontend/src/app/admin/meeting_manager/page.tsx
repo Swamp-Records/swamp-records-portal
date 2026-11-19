@@ -1,10 +1,11 @@
-export default function AboutPage() {
-  return (
-    <main className="p-8">
-      <h1 className="text-3xl font-bold">About</h1>
-      <p className="mt-4 text-gray-600">
-        meeting_creation is where the admin will create a meeting.
-      </p>
-    </main>
-  );
+import MeetingManager, { type Meeting } from "./meeting_manager";
+
+// placeholder data, replace with backend API call when available
+const TempMeetings: Meeting[] = [
+  { id: "1", name: "GBM 1", location: "Reitz 3315", pin: "3022" },
+  { id: "2", name: "Exec Meeting", location: "Reitz 3315", pin: "5173" },
+];
+
+export default function MeetingManagerPage() {
+  return <MeetingManager initialMeetings={TempMeetings} />;
 }

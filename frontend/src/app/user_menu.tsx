@@ -17,7 +17,7 @@ const menuItems: Record<MenuMode, { label: string; href: string }[]> = {
   ],
   admin: [
     { label: "Home", href: "/admin/home" },
-    { label: "Start A Meeting", href: "/admin/meeting_creation" },
+    { label: "Meeting Manager", href: "/admin/meeting_manager" },
     { label: "Attendance Stats", href: "/admin/statistics" },
     { label: "Excuse Approval", href: "/admin/excuse_approval" },
     { label: "User Lookup", href: "/admin/user_lookup" },
