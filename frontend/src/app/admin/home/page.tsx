@@ -14,7 +14,7 @@ const tiles: Tile[] = [
   { title: "Meeting Manager", href: "/admin/meeting_manager", img: calendarIcon },
   { title: "Attendance Statistics", href: "/admin/statistics", img: chartIcon },
   { title: "User Lookup", href: "/admin/user_lookup", img: searchIcon },
-  { title: "Excuse Approval", href: "/admin/excuse_approval", img: approveIcon },
+  //{ title: "Excuse Approval", href: "/admin/excuse_approval", img: approveIcon },
 ];
 
 function TileContent({ title, img }: { title: string; img: StaticImageData }) {
