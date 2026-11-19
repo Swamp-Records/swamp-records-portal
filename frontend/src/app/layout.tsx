@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import logo from "../../images/black_swamp_records_logo.png";
+import backgroundTile from "../../images/background_tile.svg";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,8 +28,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         className="min-h-full flex flex-col"
         style={{
           backgroundColor: "#d4d4d8",
-          backgroundImage: `url(${logo.src})`,
-          backgroundSize: "160px",
+          // the semi-transparent background-color layer on top fades the logos to 25% opacity
+          // the tile holds two staggered logos so every other row is shifted half a step
+          backgroundImage: `linear-gradient(rgb(212 212 216 / 0.75), rgb(212 212 216 / 0.75)), url(${backgroundTile.src})`,
+          backgroundSize: "100% 100%, 172px 280px",
         }}
       >
         {children}
